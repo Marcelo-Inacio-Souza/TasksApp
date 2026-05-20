@@ -1,6 +1,7 @@
-﻿from functools import lru_cache
+from functools import lru_cache
 from urllib.parse import quote_plus
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -19,6 +20,7 @@ class Settings(BaseSettings):
     db_user: str = "postgres"
     db_password: str = ""
     db_ssl: bool = True
+    raw_database_url: str | None = Field(default=None, alias="DATABASE_URL")
     sql_echo: bool = False
 
     upload_dir: str = "storage/uploads"
@@ -30,11 +32,26 @@ class Settings(BaseSettings):
 
     @property
     def database_url(self) -> str:
+        if self.raw_database_url:
+            return self._normalize_database_url(self.raw_database_url)
+
         password = quote_plus(self.db_password)
         return (
             f"postgresql+asyncpg://{self.db_user}:{password}"
             f"@{self.db_host}:{self.db_port}/{self.db_name}"
         )
+
+    @staticmethod
+    def _normalize_database_url(database_url: str) -> str:
+        url = database_url.strip()
+        if url.startswith("postgresql://"):
+            url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        elif url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql+asyncpg://", 1)
+
+        # SSL is configured through asyncpg connect_args. Supabase may include
+        # sslmode=require in copied strings, which asyncpg does not consume.
+        return url.split("?", 1)[0]
 
 
 @lru_cache

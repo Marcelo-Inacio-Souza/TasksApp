@@ -44,7 +44,17 @@ Invoke-RestMethod http://127.0.0.1:8000/api/health
 python -m scripts.check_db
 ```
 
-Se a conexao Direct do Supabase falhar por DNS, IPv6 ou timeout no Windows, use a connection string do Session Pooler no `.env`.
+Se a conexao Direct do Supabase falhar por DNS, IPv6 ou timeout no Windows, use a connection string do Session Pooler no `.env`:
+
+```env
+DATABASE_URL=postgresql://postgres.project-ref:sua-senha@pooler-host.supabase.com:5432/postgres
+```
+
+Quando a conexao estiver funcionando, aplique as migrations:
+
+```powershell
+alembic upgrade head
+```
 
 7. Instale e rode o frontend:
 
