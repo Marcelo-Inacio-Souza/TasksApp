@@ -22,6 +22,14 @@
         background: #080b12;
       }
 
+      h1,
+      h2,
+      h3,
+      h4,
+      p {
+        margin: 0;
+      }
+
       .shell {
         display: flex;
         min-height: 100vh;
@@ -30,7 +38,7 @@
       .sidebar {
         width: 288px;
         border-right: 1px solid rgba(255, 255, 255, 0.1);
-        background: rgba(2, 6, 23, 0.72);
+        background: rgba(2, 6, 23, 0.78);
         padding: 20px 16px;
       }
 
@@ -58,14 +66,6 @@
         font-size: 14px;
       }
 
-      h1,
-      h2,
-      h3,
-      h4,
-      p {
-        margin: 0;
-      }
-
       nav {
         display: grid;
         gap: 4px;
@@ -80,12 +80,28 @@
         align-items: center;
         gap: 12px;
         color: #cbd5e1;
+        font-size: 14px;
+      }
+
+      .nav-item b {
+        display: grid;
+        place-items: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.07);
+        font-size: 11px;
       }
 
       .nav-item.active {
         background: white;
         color: #020617;
         font-weight: 700;
+      }
+
+      .nav-item.active b {
+        background: #06b6d4;
+        color: white;
       }
 
       main {
@@ -101,7 +117,7 @@
         gap: 16px;
         padding: 18px 20px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        background: rgba(2, 6, 23, 0.7);
+        background: rgba(2, 6, 23, 0.72);
       }
 
       .time-row {
@@ -126,7 +142,7 @@
       }
 
       .search,
-      .button,
+      .icon-button,
       .user {
         height: 40px;
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -136,7 +152,7 @@
       }
 
       .search {
-        width: 300px;
+        width: 360px;
         display: flex;
         align-items: center;
         padding: 0 12px;
@@ -144,10 +160,12 @@
         font-size: 14px;
       }
 
-      .button {
+      .icon-button {
         width: 40px;
         display: grid;
         place-items: center;
+        font-size: 12px;
+        font-weight: 700;
       }
 
       .user {
@@ -169,21 +187,33 @@
         font-weight: 800;
       }
 
-      .metrics {
+      .metrics,
+      .modules,
+      .board {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 16px;
+      }
+
+      .metrics {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         padding: 20px;
       }
 
+      .modules {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        padding: 0 20px 20px;
+      }
+
       .metric,
+      .module,
       .column,
       .task {
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 8px;
       }
 
-      .metric {
+      .metric,
+      .module {
         background: rgba(255, 255, 255, 0.06);
         padding: 16px;
       }
@@ -192,6 +222,28 @@
         display: block;
         margin-top: 12px;
         font-size: 32px;
+      }
+
+      .module code {
+        display: grid;
+        place-items: center;
+        width: 36px;
+        height: 32px;
+        border-radius: 8px;
+        background: rgba(6, 182, 212, 0.14);
+        color: #67e8f9;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .module h4 {
+        margin-top: 12px;
+      }
+
+      .module p {
+        margin-top: 6px;
+        line-height: 1.35;
       }
 
       .board-wrap {
@@ -217,9 +269,7 @@
       }
 
       .board {
-        display: grid;
         grid-template-columns: repeat(4, minmax(220px, 1fr));
-        gap: 16px;
       }
 
       .column {
@@ -243,11 +293,20 @@
         margin-right: 8px;
       }
 
-      .count {
+      .count,
+      .pill {
         border-radius: 6px;
-        background: rgba(255, 255, 255, 0.08);
         color: #cbd5e1;
         font-size: 12px;
+      }
+
+      .count {
+        background: rgba(255, 255, 255, 0.08);
+        padding: 4px 8px;
+      }
+
+      .pill {
+        border: 1px solid rgba(255, 255, 255, 0.1);
         padding: 4px 8px;
       }
 
@@ -264,14 +323,6 @@
         align-items: flex-start;
       }
 
-      .pill {
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 6px;
-        padding: 4px 8px;
-        color: #cbd5e1;
-        font-size: 12px;
-      }
-
       .task-meta {
         margin-top: 12px;
         display: flex;
@@ -280,12 +331,13 @@
         font-size: 12px;
       }
 
-      @media (max-width: 1100px) {
+      @media (max-width: 1180px) {
         .sidebar {
           display: none;
         }
 
         .metrics,
+        .modules,
         .board {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
@@ -303,6 +355,7 @@
         }
 
         .metrics,
+        .modules,
         .board {
           grid-template-columns: 1fr;
         }
@@ -313,68 +366,83 @@
     <div class="shell">
       <aside class="sidebar">
         <div class="brand">
-          <div class="logo">✓</div>
+          <div class="logo">TA</div>
           <div>
             <p class="muted">Grupo empresarial</p>
             <h1>TasksApp</h1>
           </div>
         </div>
         <nav>
-          <div class="nav-item active">▦ Painel</div>
-          <div class="nav-item">▥ Quadros</div>
-          <div class="nav-item">▤ Documentos</div>
-          <div class="nav-item">⌂ Empresas</div>
-          <div class="nav-item">◎ Usuarios</div>
-          <div class="nav-item">⚙ Configuracoes</div>
+          <div class="nav-item active"><b>PA</b> Painel</div>
+          <div class="nav-item"><b>QD</b> Quadros</div>
+          <div class="nav-item"><b>DC</b> Documentos</div>
+          <div class="nav-item"><b>RB</b> Reembolsos</div>
+          <div class="nav-item"><b>CH</b> Chat</div>
+          <div class="nav-item"><b>ON</b> Reunioes</div>
+          <div class="nav-item"><b>XL</b> Relatorios</div>
+          <div class="nav-item"><b>EM</b> Empresas</div>
+          <div class="nav-item"><b>US</b> Usuarios</div>
+          <div class="nav-item"><b>CF</b> Configuracoes</div>
         </nav>
       </aside>
       <main>
         <header>
           <div>
-            <p class="muted" id="date">quarta-feira, 20 de maio de 2026</p>
+            <p class="muted" id="date">sexta-feira, 22 de maio de 2026</p>
             <div class="time-row">
               <h2>Painel operacional</h2>
               <span class="clock" id="clock">--:--:--</span>
             </div>
           </div>
           <div class="actions">
-            <div class="search">Pesquisar tarefas, empresas ou documentos</div>
-            <div class="button">◐</div>
-            <div class="button">🔔</div>
+            <div class="search">Pesquisar tarefas, medicoes, contratos ou documentos</div>
+            <div class="icon-button">CL</div>
+            <div class="icon-button">AL</div>
             <div class="user"><span class="avatar">MI</span> Marcelo Inacio</div>
           </div>
         </header>
+
         <section class="metrics">
-          <div class="metric"><p class="muted">Tarefas abertas</p><strong>42</strong><p class="muted">8 vencem esta semana</p></div>
-          <div class="metric"><p class="muted">Documentos</p><strong>128</strong><p class="muted">24 enviados no mes</p></div>
-          <div class="metric"><p class="muted">Usuarios ativos</p><strong>30</strong><p class="muted">6 empresas conectadas</p></div>
-          <div class="metric"><p class="muted">Fluxos configurados</p><strong>5</strong><p class="muted">Modelo editavel</p></div>
+          <div class="metric"><p class="muted">Tarefas abertas</p><strong>42</strong><p class="muted">Manutencao, zeladoria e obras</p></div>
+          <div class="metric"><p class="muted">Documentos</p><strong>128</strong><p class="muted">Planilhas, fotos, contratos e notas</p></div>
+          <div class="metric"><p class="muted">Reembolsos</p><strong>17</strong><p class="muted">6 aguardando aprovacao</p></div>
+          <div class="metric"><p class="muted">Relatorios Excel</p><strong>9</strong><p class="muted">Gerados neste mes</p></div>
         </section>
+
+        <section class="modules">
+          <div class="module"><code>DOC</code><h4>Arquivos</h4><p class="muted">Troca de documentos por tarefa, contrato, empresa ou medicao.</p></div>
+          <div class="module"><code>MED</code><h4>Medicoes</h4><p class="muted">Planilhas de obras, custos, periodos e evidencias de campo.</p></div>
+          <div class="module"><code>REB</code><h4>Reembolsos</h4><p class="muted">Solicitacoes com anexos, aprovacao e historico financeiro.</p></div>
+          <div class="module"><code>MSG</code><h4>Chat</h4><p class="muted">Conversas por tarefa, equipe, contrato ou usuario.</p></div>
+          <div class="module"><code>ON</code><h4>Reunioes</h4><p class="muted">Links para reunioes online e integracao futura com Teams.</p></div>
+          <div class="module"><code>XLS</code><h4>Relatorios</h4><p class="muted">Exportacao Excel para orgaos publicos, custos e produtividade.</p></div>
+        </section>
+
         <section class="board-wrap">
           <div class="board-head">
             <div>
               <h3>Quadro principal</h3>
-              <p class="muted">Fluxo inicial demonstrativo para validarmos visual e navegacao.</p>
+              <p class="muted">Fluxo demonstrativo para contratos publicos, obras e servicos recorrentes.</p>
             </div>
             <button class="new-task">+ Nova tarefa</button>
           </div>
           <div class="board">
             <div class="column">
               <div class="column-title"><h4><span class="dot" style="background:#38bdf8"></span>Entrada</h4><span class="count">2</span></div>
-              <div class="task"><div class="task-top"><strong>Conferir contrato de fornecedor</strong><span class="pill">Alta</span></div><p class="muted" style="margin-top:12px">Empresa 01</p><div class="task-meta"><span>Hoje</span><span>Doc</span></div></div>
-              <div class="task"><div class="task-top"><strong>Importar documentos fiscais</strong><span class="pill">Normal</span></div><p class="muted" style="margin-top:12px">Empresa 04</p><div class="task-meta"><span>Amanha</span><span>Doc</span></div></div>
+              <div class="task"><div class="task-top"><strong>Conferir medicao de rocagem em escola municipal</strong><span class="pill">Alta</span></div><p class="muted" style="margin-top:12px">Contrato publico - Zeladoria</p><div class="task-meta"><span>Hoje</span><span>XLS</span></div></div>
+              <div class="task"><div class="task-top"><strong>Anexar notas para reembolso de equipe de campo</strong><span class="pill">Normal</span></div><p class="muted" style="margin-top:12px">Empresa 04 - Obras</p><div class="task-meta"><span>Amanha</span><span>PDF</span></div></div>
             </div>
             <div class="column">
               <div class="column-title"><h4><span class="dot" style="background:#fbbf24"></span>Em analise</h4><span class="count">1</span></div>
-              <div class="task"><div class="task-top"><strong>Validar solicitacao comercial</strong><span class="pill">Normal</span></div><p class="muted" style="margin-top:12px">Empresa 02</p><div class="task-meta"><span>21/05</span><span>Doc</span></div></div>
+              <div class="task"><div class="task-top"><strong>Validar custos de reflorestamento por talhao</strong><span class="pill">Normal</span></div><p class="muted" style="margin-top:12px">Empresa 02 - Reflorestamento</p><div class="task-meta"><span>21/05</span><span>XLS</span></div></div>
             </div>
             <div class="column">
               <div class="column-title"><h4><span class="dot" style="background:#a78bfa"></span>Aguardando retorno</h4><span class="count">1</span></div>
-              <div class="task"><div class="task-top"><strong>Revisar documentos do processo</strong><span class="pill">Media</span></div><p class="muted" style="margin-top:12px">Empresa 05</p><div class="task-meta"><span>23/05</span><span>Doc</span></div></div>
+              <div class="task"><div class="task-top"><strong>Aguardar retorno do fiscal do contrato</strong><span class="pill">Media</span></div><p class="muted" style="margin-top:12px">Orgao publico - Cemiterios</p><div class="task-meta"><span>23/05</span><span>Chat</span></div></div>
             </div>
             <div class="column">
               <div class="column-title"><h4><span class="dot" style="background:#34d399"></span>Concluido</h4><span class="count">1</span></div>
-              <div class="task"><div class="task-top"><strong>Atualizar cadastro interno</strong><span class="pill">Baixa</span></div><p class="muted" style="margin-top:12px">Empresa 03</p><div class="task-meta"><span>Ontem</span><span>Doc</span></div></div>
+              <div class="task"><div class="task-top"><strong>Exportar relatorio mensal de manutencao</strong><span class="pill">Baixa</span></div><p class="muted" style="margin-top:12px">Empresa 03 - Areas verdes</p><div class="task-meta"><span>Ontem</span><span>Excel</span></div></div>
             </div>
           </div>
         </section>

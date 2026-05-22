@@ -2,6 +2,18 @@
 
 Sistema interno de gestao de tarefas, documentos e fluxos empresariais para um grupo com multiplas empresas.
 
+## Escopo funcional planejado
+
+- Gestao de tarefas compartilhadas e individuais, com hierarquia de usuarios.
+- Biblioteca local de documentos para troca de arquivos entre usuarios.
+- Controle de planilhas de medicoes, custos de obras e solicitacoes de reembolso.
+- Chat interno por tarefa, projeto, empresa ou conversa direta.
+- Links de reunioes online, com integracao futura para Microsoft Teams ou ferramenta similar.
+- Relatorios operacionais e gerenciais, com foco em exportacao Excel.
+- Importacao e exportacao de documentos, planilhas e evidencias.
+- Fluxos adaptados para contratos de manutencao, areas verdes, reflorestamento, zeladoria, cemiterios e servicos publicos.
+- Organizacao por empresas, contratos, clientes, unidades atendidas e orgaos publicos.
+
 ## Stack inicial
 
 - Backend: FastAPI
