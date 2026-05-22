@@ -72,6 +72,9 @@ alembic upgrade head
 
 ```powershell
 cd frontend
+$env:NODE_OPTIONS="--dns-result-order=ipv4first --use-system-ca"
 npm install
 npm run dev
 ```
+
+No Windows, a variavel `NODE_OPTIONS` acima ajuda o npm a usar os certificados do sistema e evita erros como `UNABLE_TO_VERIFY_LEAF_SIGNATURE`.

@@ -16,6 +16,7 @@ htmlcov/
 # Node
 frontend/node_modules/
 frontend/dist/
+frontend/tsconfig.tsbuildinfo
 
 # Local storage
 storage/uploads/*
