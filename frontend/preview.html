@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TasksApp Preview</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+        background: #080b12;
+        color: #f8fafc;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+        background: #080b12;
+      }
+
+      .shell {
+        display: flex;
+        min-height: 100vh;
+      }
+
+      .sidebar {
+        width: 288px;
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(2, 6, 23, 0.72);
+        padding: 20px 16px;
+      }
+
+      .brand {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        padding: 0 8px;
+      }
+
+      .logo {
+        display: grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        background: #06b6d4;
+        color: white;
+        font-weight: 800;
+        box-shadow: 0 12px 24px rgba(6, 182, 212, 0.25);
+      }
+
+      .muted {
+        color: #94a3b8;
+        font-size: 14px;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      p {
+        margin: 0;
+      }
+
+      nav {
+        display: grid;
+        gap: 4px;
+        margin-top: 32px;
+      }
+
+      .nav-item {
+        height: 44px;
+        border-radius: 6px;
+        padding: 0 12px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #cbd5e1;
+      }
+
+      .nav-item.active {
+        background: white;
+        color: #020617;
+        font-weight: 700;
+      }
+
+      main {
+        flex: 1;
+        min-width: 0;
+      }
+
+      header {
+        min-height: 80px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 18px 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(2, 6, 23, 0.7);
+      }
+
+      .time-row {
+        margin-top: 6px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .clock {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        padding: 5px 8px;
+        color: #cbd5e1;
+        font-size: 14px;
+      }
+
+      .actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .search,
+      .button,
+      .user {
+        height: 40px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.06);
+        color: #e2e8f0;
+      }
+
+      .search {
+        width: 300px;
+        display: flex;
+        align-items: center;
+        padding: 0 12px;
+        color: #94a3b8;
+        font-size: 14px;
+      }
+
+      .button {
+        width: 40px;
+        display: grid;
+        place-items: center;
+      }
+
+      .user {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 12px;
+      }
+
+      .avatar {
+        display: grid;
+        place-items: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        background: #06b6d4;
+        color: white;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+        padding: 20px;
+      }
+
+      .metric,
+      .column,
+      .task {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+      }
+
+      .metric {
+        background: rgba(255, 255, 255, 0.06);
+        padding: 16px;
+      }
+
+      .metric strong {
+        display: block;
+        margin-top: 12px;
+        font-size: 32px;
+      }
+
+      .board-wrap {
+        padding: 0 20px 20px;
+      }
+
+      .board-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+
+      .new-task {
+        height: 40px;
+        border: 0;
+        border-radius: 6px;
+        background: #06b6d4;
+        color: white;
+        padding: 0 16px;
+        font-weight: 700;
+      }
+
+      .board {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(220px, 1fr));
+        gap: 16px;
+      }
+
+      .column {
+        min-height: 384px;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 12px;
+      }
+
+      .column-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        margin-right: 8px;
+      }
+
+      .count {
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #cbd5e1;
+        font-size: 12px;
+        padding: 4px 8px;
+      }
+
+      .task {
+        background: rgba(2, 6, 23, 0.72);
+        padding: 12px;
+        margin-bottom: 12px;
+      }
+
+      .task-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: flex-start;
+      }
+
+      .pill {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        padding: 4px 8px;
+        color: #cbd5e1;
+        font-size: 12px;
+      }
+
+      .task-meta {
+        margin-top: 12px;
+        display: flex;
+        justify-content: space-between;
+        color: #94a3b8;
+        font-size: 12px;
+      }
+
+      @media (max-width: 1100px) {
+        .sidebar {
+          display: none;
+        }
+
+        .metrics,
+        .board {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .search {
+          display: none;
+        }
+      }
+
+      @media (max-width: 680px) {
+        header,
+        .board-head {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .metrics,
+        .board {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="logo">✓</div>
+          <div>
+            <p class="muted">Grupo empresarial</p>
+            <h1>TasksApp</h1>
+          </div>
+        </div>
+        <nav>
+          <div class="nav-item active">▦ Painel</div>
+          <div class="nav-item">▥ Quadros</div>
+          <div class="nav-item">▤ Documentos</div>
+          <div class="nav-item">⌂ Empresas</div>
+          <div class="nav-item">◎ Usuarios</div>
+          <div class="nav-item">⚙ Configuracoes</div>
+        </nav>
+      </aside>
+      <main>
+        <header>
+          <div>
+            <p class="muted" id="date">quarta-feira, 20 de maio de 2026</p>
+            <div class="time-row">
+              <h2>Painel operacional</h2>
+              <span class="clock" id="clock">--:--:--</span>
+            </div>
+          </div>
+          <div class="actions">
+            <div class="search">Pesquisar tarefas, empresas ou documentos</div>
+            <div class="button">◐</div>
+            <div class="button">🔔</div>
+            <div class="user"><span class="avatar">MI</span> Marcelo Inacio</div>
+          </div>
+        </header>
+        <section class="metrics">
+          <div class="metric"><p class="muted">Tarefas abertas</p><strong>42</strong><p class="muted">8 vencem esta semana</p></div>
+          <div class="metric"><p class="muted">Documentos</p><strong>128</strong><p class="muted">24 enviados no mes</p></div>
+          <div class="metric"><p class="muted">Usuarios ativos</p><strong>30</strong><p class="muted">6 empresas conectadas</p></div>
+          <div class="metric"><p class="muted">Fluxos configurados</p><strong>5</strong><p class="muted">Modelo editavel</p></div>
+        </section>
+        <section class="board-wrap">
+          <div class="board-head">
+            <div>
+              <h3>Quadro principal</h3>
+              <p class="muted">Fluxo inicial demonstrativo para validarmos visual e navegacao.</p>
+            </div>
+            <button class="new-task">+ Nova tarefa</button>
+          </div>
+          <div class="board">
+            <div class="column">
+              <div class="column-title"><h4><span class="dot" style="background:#38bdf8"></span>Entrada</h4><span class="count">2</span></div>
+              <div class="task"><div class="task-top"><strong>Conferir contrato de fornecedor</strong><span class="pill">Alta</span></div><p class="muted" style="margin-top:12px">Empresa 01</p><div class="task-meta"><span>Hoje</span><span>Doc</span></div></div>
+              <div class="task"><div class="task-top"><strong>Importar documentos fiscais</strong><span class="pill">Normal</span></div><p class="muted" style="margin-top:12px">Empresa 04</p><div class="task-meta"><span>Amanha</span><span>Doc</span></div></div>
+            </div>
+            <div class="column">
+              <div class="column-title"><h4><span class="dot" style="background:#fbbf24"></span>Em analise</h4><span class="count">1</span></div>
+              <div class="task"><div class="task-top"><strong>Validar solicitacao comercial</strong><span class="pill">Normal</span></div><p class="muted" style="margin-top:12px">Empresa 02</p><div class="task-meta"><span>21/05</span><span>Doc</span></div></div>
+            </div>
+            <div class="column">
+              <div class="column-title"><h4><span class="dot" style="background:#a78bfa"></span>Aguardando retorno</h4><span class="count">1</span></div>
+              <div class="task"><div class="task-top"><strong>Revisar documentos do processo</strong><span class="pill">Media</span></div><p class="muted" style="margin-top:12px">Empresa 05</p><div class="task-meta"><span>23/05</span><span>Doc</span></div></div>
+            </div>
+            <div class="column">
+              <div class="column-title"><h4><span class="dot" style="background:#34d399"></span>Concluido</h4><span class="count">1</span></div>
+              <div class="task"><div class="task-top"><strong>Atualizar cadastro interno</strong><span class="pill">Baixa</span></div><p class="muted" style="margin-top:12px">Empresa 03</p><div class="task-meta"><span>Ontem</span><span>Doc</span></div></div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script>
+      const clock = document.querySelector("#clock");
+      const date = document.querySelector("#date");
+      function tick() {
+        const now = new Date();
+        clock.textContent = now.toLocaleTimeString("pt-BR", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        });
+        date.textContent = now.toLocaleDateString("pt-BR", {
+          weekday: "long",
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
+        });
+      }
+      tick();
+      setInterval(tick, 1000);
+    </script>
+  </body>
+</html>
