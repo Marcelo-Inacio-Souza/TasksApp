@@ -24,6 +24,30 @@ Sistema interno de gestao de tarefas, documentos e fluxos empresariais para um g
 
 ## Desenvolvimento local
 
+### Abrir o sistema para testes
+
+Para abrir tudo com um comando no Windows PowerShell:
+
+```powershell
+cd "C:\Users\Marcelo\Desktop\MARCELO LOCAL\DESKTOP LOCAL II\__SISTEMAS__\Projetos\tasks_app"
+.\scripts\start_dev.ps1
+```
+
+O script abre duas janelas:
+
+- Backend FastAPI: `http://127.0.0.1:8000`
+- Frontend React: `http://127.0.0.1:5173`
+
+Depois que as duas janelas terminarem de carregar, acesse:
+
+- App: `http://127.0.0.1:5173`
+- Documentacao da API: `http://127.0.0.1:8000/docs`
+- Teste rapido da API: `http://127.0.0.1:8000/api/health`
+
+Para encerrar, feche as duas janelas abertas pelo script ou pressione `Ctrl+C` em cada uma.
+
+### Passo a passo manual
+
 1. Ative o ambiente virtual:
 
 ```powershell

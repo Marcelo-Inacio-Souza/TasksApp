@@ -201,6 +201,7 @@ export function App() {
     () => (localStorage.getItem('tasksapp-theme') as Theme) || 'dark',
   );
   const clock = useLocalClock();
+  const isDark = theme === 'dark';
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
@@ -208,15 +209,27 @@ export function App() {
   }, [theme]);
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-950 transition-colors dark:bg-[#080b12] dark:text-slate-100">
+    <div
+      className={clsx(
+        'min-h-screen transition-colors',
+        isDark ? 'bg-slate-950 text-slate-100' : 'bg-slate-100 text-slate-950',
+      )}
+    >
       <div className="flex min-h-screen">
-        <aside className="hidden w-72 border-r border-slate-200 bg-white/85 px-4 py-5 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/80 lg:block">
+        <aside
+          className={clsx(
+            'hidden w-72 border-r px-4 py-5 backdrop-blur-xl lg:block',
+            isDark ? 'border-white/10 bg-slate-950' : 'border-slate-200 bg-white/85',
+          )}
+        >
           <div className="flex items-center gap-3 px-2">
             <div className="grid h-10 w-10 place-items-center rounded-lg bg-cyan-500 text-sm font-black text-white shadow-lg shadow-cyan-500/25">
               TA
             </div>
             <div>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Grupo empresarial</p>
+              <p className={clsx('text-sm', isDark ? 'text-slate-400' : 'text-slate-500')}>
+                Grupo empresarial
+              </p>
               <h1 className="text-lg font-semibold tracking-normal">TasksApp</h1>
             </div>
           </div>
@@ -228,8 +241,12 @@ export function App() {
                 className={clsx(
                   'flex h-11 w-full items-center gap-3 rounded-md px-3 text-sm font-medium transition',
                   active
-                    ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-950'
-                    : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/10',
+                    ? isDark
+                      ? 'bg-white text-slate-950'
+                      : 'bg-slate-950 text-white'
+                    : isDark
+                      ? 'text-slate-300 hover:bg-white/10'
+                      : 'text-slate-600 hover:bg-slate-100',
                 )}
               >
                 <Icon size={18} />
@@ -240,35 +257,76 @@ export function App() {
         </aside>
 
         <main className="flex min-w-0 flex-1 flex-col">
-          <header className="flex min-h-20 items-center justify-between gap-4 border-b border-slate-200 bg-white/85 px-5 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/75">
+          <header
+            className={clsx(
+              'flex min-h-20 items-center justify-between gap-4 border-b px-5 backdrop-blur-xl',
+              isDark ? 'border-white/10 bg-slate-950/95' : 'border-slate-200 bg-white/85',
+            )}
+          >
             <div className="min-w-0">
-              <p className="flex items-center gap-2 text-sm capitalize text-slate-500 dark:text-slate-400">
+              <p
+                className={clsx(
+                  'flex items-center gap-2 text-sm capitalize',
+                  isDark ? 'text-slate-400' : 'text-slate-500',
+                )}
+              >
                 <CalendarClock size={16} /> {clock.date}
               </p>
               <div className="mt-1 flex flex-wrap items-baseline gap-3">
                 <h2 className="text-2xl font-semibold tracking-normal">Painel operacional</h2>
-                <span className="rounded-md border border-slate-200 px-2 py-1 text-sm text-slate-500 dark:border-white/10 dark:text-slate-300">
+                <span
+                  className={clsx(
+                    'rounded-md border px-2 py-1 text-sm',
+                    isDark ? 'border-white/10 text-slate-300' : 'border-slate-200 text-slate-500',
+                  )}
+                >
                   {clock.time}
                 </span>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <div className="hidden h-10 w-80 items-center gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 text-slate-500 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-400 md:flex">
+              <div
+                className={clsx(
+                  'hidden h-10 w-80 items-center gap-2 rounded-md border px-3 md:flex',
+                  isDark
+                    ? 'border-white/10 bg-slate-900 text-slate-400'
+                    : 'border-slate-200 bg-slate-50 text-slate-500',
+                )}
+              >
                 <Search size={17} />
                 <span className="text-sm">Pesquisar tarefas, medicoes, contratos ou documentos</span>
               </div>
-              <button className="grid h-10 w-10 place-items-center rounded-md border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-100 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-200 dark:hover:bg-white/10">
+              <button
+                className={clsx(
+                  'grid h-10 w-10 place-items-center rounded-md border transition',
+                  isDark
+                    ? 'border-white/10 bg-slate-900 text-slate-200 hover:bg-slate-800'
+                    : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-100',
+                )}
+              >
                 <Bell size={18} />
               </button>
               <button
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                className="grid h-10 w-10 place-items-center rounded-md border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-100 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-200 dark:hover:bg-white/10"
+                className={clsx(
+                  'grid h-10 w-10 place-items-center rounded-md border transition',
+                  isDark
+                    ? 'border-white/10 bg-slate-900 text-slate-200 hover:bg-slate-800'
+                    : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-100',
+                )}
                 title="Alternar tema"
               >
                 {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
               </button>
-              <button className="flex h-10 items-center gap-3 rounded-md border border-slate-200 bg-white px-3 text-left transition hover:bg-slate-100 dark:border-white/10 dark:bg-white/[0.06] dark:hover:bg-white/10">
+              <button
+                className={clsx(
+                  'flex h-10 items-center gap-3 rounded-md border px-3 text-left transition',
+                  isDark
+                    ? 'border-white/10 bg-slate-900 hover:bg-slate-800'
+                    : 'border-slate-200 bg-white hover:bg-slate-100',
+                )}
+              >
                 <span className="grid h-7 w-7 place-items-center rounded-md bg-cyan-500 text-xs font-bold text-white">
                   MI
                 </span>
@@ -281,11 +339,18 @@ export function App() {
             {metrics.map((metric) => (
               <div
                 key={metric.label}
-                className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-white/[0.06]"
+                className={clsx(
+                  'rounded-lg border p-4 shadow-sm',
+                  isDark ? 'border-white/10 bg-slate-900' : 'border-slate-200 bg-white',
+                )}
               >
-                <p className="text-sm text-slate-500 dark:text-slate-400">{metric.label}</p>
+                <p className={clsx('text-sm', isDark ? 'text-slate-400' : 'text-slate-500')}>
+                  {metric.label}
+                </p>
                 <p className="mt-3 text-3xl font-semibold tracking-normal">{metric.value}</p>
-                <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">{metric.caption}</p>
+                <p className={clsx('mt-2 text-sm', isDark ? 'text-slate-400' : 'text-slate-500')}>
+                  {metric.caption}
+                </p>
               </div>
             ))}
           </section>
@@ -294,13 +359,26 @@ export function App() {
             {modules.map((module) => (
               <div
                 key={module.code}
-                className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-white/[0.05]"
+                className={clsx(
+                  'rounded-lg border p-4 shadow-sm',
+                  isDark ? 'border-white/10 bg-slate-900' : 'border-slate-200 bg-white',
+                )}
               >
-                <span className="grid h-8 w-10 place-items-center rounded-md bg-cyan-500/10 text-xs font-black text-cyan-500 dark:text-cyan-300">
+                <span
+                  className={clsx(
+                    'grid h-8 w-10 place-items-center rounded-md bg-cyan-500/10 text-xs font-black',
+                    isDark ? 'text-cyan-300' : 'text-cyan-500',
+                  )}
+                >
                   {module.code}
                 </span>
                 <h3 className="mt-3 font-semibold">{module.title}</h3>
-                <p className="mt-2 text-sm leading-5 text-slate-500 dark:text-slate-400">
+                <p
+                  className={clsx(
+                    'mt-2 text-sm leading-5',
+                    isDark ? 'text-slate-400' : 'text-slate-500',
+                  )}
+                >
                   {module.description}
                 </p>
               </div>
@@ -311,7 +389,7 @@ export function App() {
             <div className="mb-4 flex items-center justify-between gap-3">
               <div>
                 <h3 className="text-lg font-semibold">Quadro principal</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
+                <p className={clsx('text-sm', isDark ? 'text-slate-400' : 'text-slate-500')}>
                   Fluxo demonstrativo para contratos publicos, obras e servicos recorrentes.
                 </p>
               </div>
@@ -324,14 +402,22 @@ export function App() {
               {columns.map((column) => (
                 <div
                   key={column.title}
-                  className="min-h-96 rounded-lg border border-slate-200 bg-white/70 p-3 dark:border-white/10 dark:bg-white/[0.05]"
+                  className={clsx(
+                    'min-h-96 rounded-lg border p-3',
+                    isDark ? 'border-white/10 bg-slate-900' : 'border-slate-200 bg-white/70',
+                  )}
                 >
                   <div className="mb-3 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className={clsx('h-2.5 w-2.5 rounded-full', column.color)} />
                       <h4 className="font-semibold">{column.title}</h4>
                     </div>
-                    <span className="rounded-md bg-slate-100 px-2 py-1 text-xs text-slate-500 dark:bg-white/10 dark:text-slate-300">
+                    <span
+                      className={clsx(
+                        'rounded-md px-2 py-1 text-xs',
+                        isDark ? 'bg-white/10 text-slate-300' : 'bg-slate-100 text-slate-500',
+                      )}
+                    >
                       {column.tasks.length}
                     </span>
                   </div>
@@ -340,20 +426,45 @@ export function App() {
                     {column.tasks.map((task) => (
                       <article
                         key={task.title}
-                        className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-panel dark:border-white/10 dark:bg-slate-950/70"
+                        className={clsx(
+                          'rounded-lg border p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-panel',
+                          isDark ? 'border-white/10 bg-slate-950' : 'border-slate-200 bg-white',
+                        )}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <h5 className="text-sm font-semibold leading-5">{task.title}</h5>
-                          <span className="rounded-md border border-slate-200 px-2 py-1 text-xs text-slate-500 dark:border-white/10 dark:text-slate-300">
+                          <span
+                            className={clsx(
+                              'rounded-md border px-2 py-1 text-xs',
+                              isDark
+                                ? 'border-white/10 text-slate-300'
+                                : 'border-slate-200 text-slate-500',
+                            )}
+                          >
                             {task.priority}
                           </span>
                         </div>
-                        <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                        <p
+                          className={clsx(
+                            'mt-3 text-xs',
+                            isDark ? 'text-slate-400' : 'text-slate-500',
+                          )}
+                        >
                           {task.context}
                         </p>
-                        <div className="mt-3 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                        <div
+                          className={clsx(
+                            'mt-3 flex items-center justify-between text-xs',
+                            isDark ? 'text-slate-400' : 'text-slate-500',
+                          )}
+                        >
                           <span>{task.due}</span>
-                          <span className="rounded-md bg-slate-100 px-2 py-1 dark:bg-white/10">
+                          <span
+                            className={clsx(
+                              'rounded-md px-2 py-1',
+                              isDark ? 'bg-white/10' : 'bg-slate-100',
+                            )}
+                          >
                             {task.tag}
                           </span>
                         </div>
