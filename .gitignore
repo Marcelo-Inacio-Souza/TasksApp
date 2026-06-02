@@ -21,6 +21,7 @@ frontend/tsconfig.tsbuildinfo
 # Local storage
 storage/uploads/*
 !storage/uploads/.gitkeep
+frontend-dev*.log
 
 # Editors / OS
 .vscode/
