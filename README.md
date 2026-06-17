@@ -46,6 +46,23 @@ Depois que as duas janelas terminarem de carregar, acesse:
 
 Para encerrar, feche as duas janelas abertas pelo script ou pressione `Ctrl+C` em cada uma.
 
+### Autenticacao inicial
+
+O App ja possui o primeiro fluxo funcional de autenticacao:
+
+- Antes do primeiro usuario, use a opcao `Criar primeiro master` na tela de login.
+- O usuario master tem permissao total e pode cadastrar novos usuarios.
+- Novos usuarios sao criados pelo master com senha padrao `user123`.
+- No primeiro acesso, o usuario comum deve trocar a senha antes de entrar no painel.
+- Perfis iniciais: master, diretor, gerente, engenharia, analista, assistente e producao.
+
+Se o banco estiver vazio, aplique as migrations antes do primeiro acesso:
+
+```powershell
+.venv\Scripts\activate
+alembic upgrade head
+```
+
 ### Passo a passo manual
 
 1. Ative o ambiente virtual:

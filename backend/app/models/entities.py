@@ -37,6 +37,7 @@ class Role(TimestampMixin, Base):
     code: Mapped[str] = mapped_column(String(80), nullable=False, unique=True)
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
+    hierarchy_level: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     permissions: Mapped[dict[str, Any]] = mapped_column(JSONB, default=dict, nullable=False)
     is_system: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
@@ -54,11 +55,14 @@ class User(TimestampMixin, Base):
     email: Mapped[str] = mapped_column(String(220), nullable=False, unique=True, index=True)
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
     avatar_url: Mapped[str | None] = mapped_column(String(500))
+    must_change_password: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    created_by_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     company: Mapped[Company | None] = relationship(back_populates="users")
     role: Mapped[Role] = relationship(back_populates="users")
+    created_by: Mapped["User | None"] = relationship(remote_side=[id])
     assigned_tasks: Mapped[list["TaskAssignee"]] = relationship(back_populates="user")
 
 

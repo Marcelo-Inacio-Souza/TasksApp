@@ -1,4 +1,5 @@
 ﻿import asyncio
+import ssl as _ssl
 from logging.config import fileConfig
 
 from backend.app import models  # noqa: F401
@@ -36,7 +37,14 @@ def do_run_migrations(connection) -> None:
 
 
 async def run_migrations_online() -> None:
-    connect_args = {"ssl": True} if settings.db_ssl else {}
+    if settings.db_ssl:
+        _ctx = _ssl.create_default_context()
+        _ctx.check_hostname = False
+        _ctx.verify_mode = _ssl.CERT_NONE
+        connect_args = {"ssl": _ctx}
+    else:
+        connect_args = {}
+
     connectable = create_async_engine(
         settings.database_url,
         poolclass=pool.NullPool,
