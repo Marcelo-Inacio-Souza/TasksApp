@@ -45,6 +45,7 @@ type AuthUser = {
   role_id: string;
   role: Role;
   name: string;
+  username: string;
   email: string;
   avatar_url: string | null;
   must_change_password: boolean;
@@ -323,10 +324,10 @@ export function App() {
     setAuthMode('login');
   }
 
-  async function handleLogin(email: string, password: string) {
+  async function handleLogin(username: string, password: string) {
     setAuthError('');
     const body = new URLSearchParams();
-    body.set('username', email);
+    body.set('username', username);
     body.set('password', password);
 
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
@@ -400,45 +401,40 @@ export function App() {
             isDark ? 'border-white/10 bg-slate-950' : 'border-slate-200 bg-white/85',
           )}
         >
-          {/* Botão recolher */}
-          <button
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            title={sidebarCollapsed ? 'Expandir menu' : 'Recolher menu'}
+          {/* Logo + botao recolher */}
+          <div
             className={clsx(
-              
-              isDark
-                ? 'border-cyan-400 bg-slate-800 text-cyan-400 hover:bg-cyan-400 hover:text-slate-950'
-                : 'border-cyan-500 bg-white text-cyan-500 hover:bg-cyan-500 hover:text-white',
+              'flex items-center gap-3 px-1 overflow-hidden',
+              sidebarCollapsed ? 'justify-center' : 'justify-between',
             )}
-          >            
-          </button>
-
-          {/* Logo */}
-<div className={clsx('flex items-center gap-3 px-1 overflow-hidden', sidebarCollapsed ? 'justify-center' : 'justify-between')}>
-  <div className="flex items-center gap-3 min-w-0">
-    <img
-      src="/logo-sangra.png"
-      alt="Sangra D'Água"
-      className={clsx('object-contain flex-shrink-0', sidebarCollapsed ? 'h-8 w-8' : 'h-9 w-auto')}
-    />
-    {!sidebarCollapsed && (
-      <h1 className="text-lg font-semibold tracking-normal">TasksApp</h1>
-    )}
-  </div>
-  <button
-    onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-    title={sidebarCollapsed ? 'Expandir menu' : 'Recolher menu'}
-    className={clsx(
-      'grid h-7 w-7 flex-shrink-0 place-items-center rounded-md border transition',
-      isDark
-        ? 'border-white/10 text-slate-400 hover:bg-white/10 hover:text-cyan-400'
-        : 'border-slate-200 text-slate-400 hover:bg-slate-100 hover:text-cyan-500',
-    )}
-  >
-    {sidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-  </button>
-</div>          
-           {/* FIM LOGO */}
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <img
+                src="/logo-sangra.png"
+                alt="Sangra D'Água"
+                className={clsx(
+                  'object-contain flex-shrink-0',
+                  sidebarCollapsed ? 'h-8 w-8' : 'h-9 w-auto',
+                )}
+              />
+              {!sidebarCollapsed && (
+                <h1 className="text-lg font-semibold tracking-normal">TasksApp</h1>
+              )}
+            </div>
+            <button
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              title={sidebarCollapsed ? 'Expandir menu' : 'Recolher menu'}
+              className={clsx(
+                'grid h-7 w-7 flex-shrink-0 place-items-center rounded-md border transition',
+                isDark
+                  ? 'border-white/10 text-slate-400 hover:bg-white/10 hover:text-cyan-400'
+                  : 'border-slate-200 text-slate-400 hover:bg-slate-100 hover:text-cyan-500',
+              )}
+            >
+              {sidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+            </button>
+          </div>
+          {/* FIM LOGO */}
 
           {/* Nav */}
           <nav className="mt-8 flex flex-col gap-1">
@@ -503,7 +499,7 @@ export function App() {
                 <CalendarClock size={16} /> {clock.date}
               </p>
               <div className="mt-1 flex flex-wrap items-baseline gap-3">
-                <h2 className="text-2xl font-semibold tracking-normal">Painel operacional</h2>
+                <h2 className="text-2xl font-semibold tracking-normal">Painel de Gerenciamento</h2>
                 <span
                   className={clsx(
                     'rounded-md border px-2 py-1 text-sm',
@@ -696,7 +692,7 @@ function AuthScreen({
   isDark: boolean;
   setAuthMode: (mode: 'login' | 'bootstrap') => void;
   setAuthError: (error: string) => void;
-  onLogin: (email: string, password: string) => Promise<void>;
+  onLogin: (username: string, password: string) => Promise<void>;
   onBootstrap: (name: string, email: string, password: string) => Promise<void>;
   onToggleTheme: () => void;
   theme: Theme;
@@ -757,7 +753,7 @@ function AuthScreen({
                 <p className={clsx('text-sm', isDark ? 'text-slate-400' : 'text-slate-500')}>
                   {authMode === 'bootstrap'
                     ? 'Disponivel apenas antes do primeiro usuario.'
-                    : 'Use seu e-mail e senha.'}
+                    : 'Use seu nome de usuario e senha.'}
                 </p>
               </div>
             </div>
@@ -772,14 +768,27 @@ function AuthScreen({
                   autoComplete="name"
                 />
               ) : null}
-              <TextField
-                label="E-mail"
-                value={email}
-                onChange={setEmail}
-                isDark={isDark}
-                type="email"
-                autoComplete="email"
-              />
+
+              {authMode === 'login' ? (
+                <TextField
+                  label="Nome de usuario"
+                  value={email}
+                  onChange={setEmail}
+                  isDark={isDark}
+                  type="text"
+                  autoComplete="username"
+                />
+              ) : (
+                <TextField
+                  label="E-mail"
+                  value={email}
+                  onChange={setEmail}
+                  isDark={isDark}
+                  type="email"
+                  autoComplete="email"
+                />
+              )}
+
               <TextField
                 label="Senha"
                 value={password}
@@ -1004,7 +1013,7 @@ function UserAdminPanel({ isDark, token }: { isDark: boolean; token: string }) {
       setName('');
       setEmail('');
       setRoleCode('analista');
-      setMessage(`Usuario criado com senha padrao ${data.temporary_password}.`);
+      setMessage(`Usuario criado com nome de usuario "${data.user.username}" e senha padrao ${data.temporary_password}.`);
     } catch (createError) {
       setError(createError instanceof Error ? createError.message : 'Nao foi possivel criar.');
     } finally {
@@ -1022,7 +1031,7 @@ function UserAdminPanel({ isDark, token }: { isDark: boolean; token: string }) {
           <div>
             <h3 className="font-semibold">Cadastrar usuario</h3>
             <p className={clsx('text-sm', isDark ? 'text-slate-400' : 'text-slate-500')}>
-              Senha inicial: user123
+              Senha inicial gerada automaticamente
             </p>
           </div>
         </div>
@@ -1091,7 +1100,7 @@ function UserAdminPanel({ isDark, token }: { isDark: boolean; token: string }) {
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold">{item.name}</p>
                 <p className={clsx('truncate text-xs', isDark ? 'text-slate-400' : 'text-slate-500')}>
-                  {item.email}
+                  @{item.username} - {item.email}
                 </p>
               </div>
               <div className="shrink-0 text-right">

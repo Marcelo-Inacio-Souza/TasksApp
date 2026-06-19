@@ -1,5 +1,7 @@
+import re
 import secrets
 import string
+import unicodedata
 import uuid
 
 import jwt
@@ -26,6 +28,25 @@ def _temp_password(length: int = 10) -> str:
     return "".join(secrets.choice(chars) for _ in range(length))
 
 
+def _slugify_username(name: str) -> str:
+    first_name = name.strip().split(" ")[0] if name.strip() else "user"
+    normalized = unicodedata.normalize("NFKD", first_name)
+    ascii_name = normalized.encode("ascii", "ignore").decode("ascii")
+    return re.sub(r"[^a-z0-9]", "", ascii_name.lower()) or "user"
+
+
+async def _generate_unique_username(db: AsyncSession, name: str) -> str:
+    base_username = _slugify_username(name)
+    candidate = base_username
+    suffix = 2
+    while True:
+        result = await db.execute(select(User).where(User.username == candidate))
+        if not result.scalar_one_or_none():
+            return candidate
+        candidate = f"{base_username}{suffix}"
+        suffix += 1
+
+
 async def get_current_user(
     token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)
 ) -> User:
@@ -48,18 +69,9 @@ async def get_current_user(
 
 
 async def require_master(current_user: User = Depends(get_current_user)) -> User:
-    await _load_role(current_user)
     if current_user.role.code != "master":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso restrito.")
     return current_user
-
-
-async def _load_role(user: User, db: AsyncSession | None = None) -> None:
-    """Garante que user.role está carregado (lazy load seguro)."""
-    try:
-        _ = user.role.code
-    except Exception:
-        pass
 
 
 # ---------- schemas ----------
@@ -74,17 +86,23 @@ class BootstrapRequest(BaseModel):
     name: str
     email: EmailStr
     password: str
+    username: str | None = None
 
 
 class CreateUserRequest(BaseModel):
     name: str
     email: EmailStr
     role_code: str
+    username: str | None = None
 
 
 class ChangePasswordRequest(BaseModel):
     current_password: str
     new_password: str
+
+
+class UpdateUsernameRequest(BaseModel):
+    username: str
 
 
 # ---------- utilidade ----------
@@ -105,6 +123,7 @@ def _user_dict(user: User) -> dict:
             "is_active": role.is_active,
         },
         "name": user.name,
+        "username": user.username,
         "email": user.email,
         "avatar_url": user.avatar_url,
         "must_change_password": user.must_change_password,
@@ -130,6 +149,16 @@ async def _get_or_create_role(db: AsyncSession, code: str, name: str, level: int
     return role
 
 
+async def _validate_custom_username(db: AsyncSession, username: str) -> str:
+    cleaned = re.sub(r"[^a-z0-9]", "", username.strip().lower())
+    if not cleaned:
+        raise HTTPException(status_code=400, detail="Nome de usuario invalido.")
+    existing = await db.execute(select(User).where(User.username == cleaned))
+    if existing.scalar_one_or_none():
+        raise HTTPException(status_code=409, detail="Nome de usuario ja esta em uso.")
+    return cleaned
+
+
 # ---------- rotas ----------
 
 @router.post("/bootstrap-master", response_model=TokenResponse)
@@ -144,7 +173,6 @@ async def bootstrap_master(body: BootstrapRequest, db: AsyncSession = Depends(ge
 
     role = await _get_or_create_role(db, "master", "Master", 100)
 
-    # Cria roles padrão junto
     default_roles = [
         ("diretor", "Diretor", 90),
         ("gerente", "Gerente", 80),
@@ -156,9 +184,15 @@ async def bootstrap_master(body: BootstrapRequest, db: AsyncSession = Depends(ge
     for code, name, level in default_roles:
         await _get_or_create_role(db, code, name, level)
 
+    if body.username:
+        username = await _validate_custom_username(db, body.username)
+    else:
+        username = await _generate_unique_username(db, body.name)
+
     user = User(
         role_id=role.id,
         name=body.name.strip(),
+        username=username,
         email=body.email.strip().lower(),
         hashed_password=hash_password(body.password),
         must_change_password=False,
@@ -177,15 +211,16 @@ async def bootstrap_master(body: BootstrapRequest, db: AsyncSession = Depends(ge
 async def login(
     form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)
 ) -> TokenResponse:
-    email = form_data.username.strip().lower()
+    """Login por nome de usuario (username) + senha."""
+    username = form_data.username.strip().lower()
     result = await db.execute(
-        select(User).where(User.email == email, User.is_active.is_(True))
+        select(User).where(User.username == username, User.is_active.is_(True))
     )
     user = result.scalar_one_or_none()
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="E-mail ou senha invalidos.",
+            detail="Nome de usuario ou senha invalidos.",
             headers={"WWW-Authenticate": "Bearer"},
         )
     await db.refresh(user, ["role"])
@@ -244,21 +279,25 @@ async def create_user(
     current_user: User = Depends(require_master),
     db: AsyncSession = Depends(get_db),
 ) -> dict:
-    # Verifica se e-mail já existe
     existing = await db.execute(select(User).where(User.email == body.email.strip().lower()))
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=409, detail="E-mail ja cadastrado.")
 
-    # Busca role pelo code
     role_result = await db.execute(select(Role).where(Role.code == body.role_code))
     role = role_result.scalar_one_or_none()
     if not role:
         raise HTTPException(status_code=404, detail="Perfil nao encontrado.")
 
+    if body.username:
+        username = await _validate_custom_username(db, body.username)
+    else:
+        username = await _generate_unique_username(db, body.name)
+
     temp_pwd = _temp_password()
     user = User(
         role_id=role.id,
         name=body.name.strip(),
+        username=username,
         email=body.email.strip().lower(),
         hashed_password=hash_password(temp_pwd),
         must_change_password=True,
@@ -292,3 +331,34 @@ async def change_password(
     await db.refresh(current_user, ["role"])
 
     return _user_dict(current_user)
+
+
+@router.patch("/users/{user_id}/username")
+async def update_username(
+    user_id: uuid.UUID,
+    body: UpdateUsernameRequest,
+    current_user: User = Depends(require_master),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
+    """Permite ao master corrigir/editar o username gerado automaticamente."""
+    user = await db.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario nao encontrado.")
+
+    cleaned = re.sub(r"[^a-z0-9]", "", body.username.strip().lower())
+    if not cleaned:
+        raise HTTPException(status_code=400, detail="Nome de usuario invalido.")
+
+    existing = await db.execute(
+        select(User).where(User.username == cleaned, User.id != user_id)
+    )
+    if existing.scalar_one_or_none():
+        raise HTTPException(status_code=409, detail="Nome de usuario ja esta em uso.")
+
+    user.username = cleaned
+    db.add(user)
+    await db.commit()
+    await db.refresh(user)
+    await db.refresh(user, ["role"])
+
+    return _user_dict(user)

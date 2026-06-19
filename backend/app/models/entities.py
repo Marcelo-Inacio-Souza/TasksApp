@@ -52,6 +52,7 @@ class User(TimestampMixin, Base):
     company_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("companies.id"))
     role_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("roles.id"), nullable=False)
     name: Mapped[str] = mapped_column(String(140), nullable=False)
+    username: Mapped[str] = mapped_column(String(80), nullable=False, unique=True, index=True)
     email: Mapped[str] = mapped_column(String(220), nullable=False, unique=True, index=True)
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
     avatar_url: Mapped[str | None] = mapped_column(String(500))
