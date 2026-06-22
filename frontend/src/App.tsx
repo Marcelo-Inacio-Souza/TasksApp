@@ -355,7 +355,7 @@ export function App() {
   }
 
   if (loadingSession) {
-    return <ShellBackground isDark={isDark}>Carregando sessao...</ShellBackground>;
+    return <ShellBackground isDark={isDark} isAuth>Carregando sessao...</ShellBackground>;
   }
 
   if (!user) {
@@ -390,7 +390,7 @@ export function App() {
   }
 
   return (
-    <ShellBackground isDark={isDark}>
+    <ShellBackground isDark={isDark} isAuth>
       <div className="flex min-h-screen">
 
         {/* SIDEBAR */}
@@ -609,10 +609,54 @@ export function App() {
 function ShellBackground({
   children,
   isDark,
+  isAuth = false,
 }: {
   children: ReactNode;
   isDark: boolean;
+  isAuth?: boolean;
 }) {
+  if (isAuth) {
+    return (
+      <div className="relative min-h-screen overflow-hidden">
+        {/* Fundo gradiente natural */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: isDark
+              ? 'linear-gradient(135deg, #0d1f0d 0%, #1a3d1a 35%, #0f2d1a 65%, #0a1a0f 100%)'
+              : 'linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 35%, #a5d6a7 65%, #81c784 100%)',
+          }}
+        />
+        {/* Formas orgânicas decorativas */}
+        <svg
+          className="absolute inset-0 w-full h-full opacity-10"
+          viewBox="0 0 1440 900"
+          preserveAspectRatio="xMidYMid slice"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <ellipse cx="200" cy="150" rx="320" ry="280" fill={isDark ? '#4ade80' : '#166534'} />
+          <ellipse cx="1300" cy="750" rx="380" ry="300" fill={isDark ? '#16a34a' : '#14532d'} />
+          <ellipse cx="1100" cy="200" rx="200" ry="180" fill={isDark ? '#86efac' : '#15803d'} />
+          <ellipse cx="300" cy="750" rx="260" ry="200" fill={isDark ? '#22c55e' : '#166534'} />
+          <path
+            d="M0 600 Q360 480 720 560 Q1080 640 1440 500 L1440 900 L0 900 Z"
+            fill={isDark ? '#15803d' : '#bbf7d0'}
+            opacity="0.3"
+          />
+          <path
+            d="M0 700 Q400 580 800 650 Q1100 700 1440 600 L1440 900 L0 900 Z"
+            fill={isDark ? '#166534' : '#86efac'}
+            opacity="0.2"
+          />
+        </svg>
+        {/* Conteúdo */}
+        <div className={clsx('relative z-10', isDark ? 'text-slate-100' : 'text-slate-900')}>
+          {children}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className={clsx(
@@ -719,7 +763,7 @@ function AuthScreen({
   }
 
   return (
-    <ShellBackground isDark={isDark}>
+    <ShellBackground isDark={isDark} isAuth>
       <div className="grid min-h-screen place-items-center px-5 py-8">
         <div className="w-full max-w-md">
           <div className="mb-5 flex items-center justify-between">
