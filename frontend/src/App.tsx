@@ -134,7 +134,7 @@ type ApiBoardWithColumns = ApiBoard & { columns: ApiColumn[] };
 // CONSTANTS
 // ============================================================
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+const API_BASE_URL = 'http://localhost:8000/api';
 const TOKEN_STORAGE_KEY = 'tasksapp-token';
 
 const navItems: NavItem[] = [
@@ -303,7 +303,11 @@ export function App() {
     storeSession((await response.json()) as TokenResponse);
   }
 
-  if (loadingSession) return <ShellBackground isDark={isDark} isAuth><div className="grid min-h-screen place-items-center text-slate-400">Carregando...</div></ShellBackground>;
+  if (loadingSession) return (
+    <AuthShell>
+      <div className="grid min-h-screen place-items-center text-slate-400">Carregando...</div>
+    </AuthShell>
+  );
 
   if (!user) return (
     <AuthScreen authMode={authMode} authError={authError} authSuccess={authSuccess} isDark={isDark}
@@ -482,7 +486,7 @@ function QuadrosView({ isDark, token }: { isDark: boolean; token: string }) {
     try {
       const data = await api<ApiBoard[]>('/boards');
       setBoards(data);
-      if (data.length > 0 && !selectedBoard) {
+      if (data.length > 0) {
         await loadBoard(data[0].id);
       } else {
         setLoading(false);
@@ -535,24 +539,15 @@ function QuadrosView({ isDark, token }: { isDark: boolean; token: string }) {
   }
 
   if (loading) return (
-    <div className="flex flex-1 items-center justify-center">
+    <div className="flex flex-1 items-center justify-center p-10">
       <p className={clsx('text-sm', isDark ? 'text-slate-400' : 'text-slate-500')}>Carregando quadros...</p>
     </div>
   );
-
-  if (loading) return (
-  <div className="flex flex-1 items-center justify-center p-10">
-    <p className={clsx('text-sm', isDark ? 'text-slate-400' : 'text-slate-500')}>
-      Carregando quadros...
-    </p>
-  </div>
-);
 
   return (
     <div className="flex flex-1 flex-col px-5 py-5 gap-4">
       {error && <Alert tone="error">{error}</Alert>}
 
-      {/* Seletor de boards */}
       <div className="flex items-center gap-3 flex-wrap">
         {boards.map((board) => (
           <button key={board.id}
@@ -593,7 +588,6 @@ function QuadrosView({ isDark, token }: { isDark: boolean; token: string }) {
         )}
       </div>
 
-      {/* Board */}
       {selectedBoard ? (
         <KanbanBoard board={selectedBoard} isDark={isDark} token={token}
           onTaskCreated={handleTaskCreated} onTaskMoved={handleTaskMoved} />
@@ -678,7 +672,6 @@ function KanbanBoard({ board, isDark, token, onTaskCreated, onTaskMoved }: {
         </button>
       </div>
 
-      {/* Modal nova tarefa */}
       {showNewTask && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
           <div className={clsx('w-full max-w-md rounded-xl border p-6 shadow-2xl',
@@ -691,7 +684,6 @@ function KanbanBoard({ board, isDark, token, onTaskCreated, onTaskMoved }: {
                 <X size={16} />
               </button>
             </div>
-
             <div className="grid gap-3">
               <label className="grid gap-1 text-sm">
                 <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>Titulo</span>
@@ -701,7 +693,6 @@ function KanbanBoard({ board, isDark, token, onTaskCreated, onTaskMoved }: {
                   className={clsx('h-10 rounded-md border px-3 outline-none focus:border-cyan-400',
                     isDark ? 'border-white/10 bg-slate-950 text-slate-100' : 'border-slate-200 bg-white text-slate-950')} />
               </label>
-
               <label className="grid gap-1 text-sm">
                 <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>Coluna</span>
                 <select value={newTaskColumnId} onChange={(e) => setNewTaskColumnId(e.target.value)}
@@ -710,7 +701,6 @@ function KanbanBoard({ board, isDark, token, onTaskCreated, onTaskMoved }: {
                   {sortedColumns.map((col) => <option key={col.id} value={col.id}>{col.name}</option>)}
                 </select>
               </label>
-
               <label className="grid gap-1 text-sm">
                 <span className={isDark ? 'text-slate-300' : 'text-slate-700'}>Prioridade</span>
                 <select value={newTaskPriority} onChange={(e) => setNewTaskPriority(e.target.value)}
@@ -719,7 +709,6 @@ function KanbanBoard({ board, isDark, token, onTaskCreated, onTaskMoved }: {
                   {Object.entries(PRIORITY_LABELS).map(([val, label]) => <option key={val} value={val}>{label}</option>)}
                 </select>
               </label>
-
               <div className="flex gap-2 mt-2">
                 <button onClick={() => void handleCreateTask()} disabled={creating || !newTaskTitle.trim()}
                   className="flex-1 h-10 rounded-md bg-cyan-500 text-sm font-semibold text-white hover:bg-cyan-400 disabled:opacity-60 transition">
@@ -736,7 +725,6 @@ function KanbanBoard({ board, isDark, token, onTaskCreated, onTaskMoved }: {
         </div>
       )}
 
-      {/* Colunas */}
       <div className="flex gap-4 overflow-x-auto pb-4 flex-1">
         {sortedColumns.map((column) => {
           const sortedTasks = [...(column.tasks ?? [])].sort((a, b) => a.position - b.position);
@@ -746,7 +734,6 @@ function KanbanBoard({ board, isDark, token, onTaskCreated, onTaskMoved }: {
               onDrop={(e) => handleDrop(e, column.id, sortedTasks.length)}
               className={clsx('flex flex-col min-w-72 w-72 rounded-xl border',
                 isDark ? 'border-white/10 bg-slate-900/80' : 'border-slate-200 bg-white/80')}>
-              {/* Header coluna */}
               <div className="flex items-center justify-between p-3 border-b"
                 style={{ borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0' }}>
                 <div className="flex items-center gap-2">
@@ -758,8 +745,6 @@ function KanbanBoard({ board, isDark, token, onTaskCreated, onTaskMoved }: {
                   {(column.tasks ?? []).length}
                 </span>
               </div>
-
-              {/* Tasks */}
               <div className="flex flex-col gap-2 p-3 flex-1 overflow-y-auto max-h-[60vh]">
                 {sortedTasks.map((task, idx) => (
                   <div key={task.id}
@@ -799,7 +784,6 @@ function KanbanBoard({ board, isDark, token, onTaskCreated, onTaskMoved }: {
                     )}
                   </div>
                 ))}
-
                 {sortedTasks.length === 0 && (
                   <div className={clsx('flex flex-1 items-center justify-center rounded-lg border-2 border-dashed py-8',
                     isDark ? 'border-white/10 text-slate-600' : 'border-slate-200 text-slate-300')}>
@@ -816,36 +800,72 @@ function KanbanBoard({ board, isDark, token, onTaskCreated, onTaskMoved }: {
 }
 
 // ============================================================
-// SHELL BACKGROUND
+// SHELL BACKGROUNDS
 // ============================================================
 
-function ShellBackground({ children, isDark, isAuth = false }: { children: ReactNode; isDark: boolean; isAuth?: boolean }) {
-  if (isAuth) {
-    return (
-      <div className="relative min-h-screen overflow-hidden">
-        <div className="absolute inset-0" style={{
-          background: isDark
-            ? 'linear-gradient(135deg, #0d1f0d 0%, #1a3d1a 35%, #0f2d1a 65%, #0a1a0f 100%)'
-            : 'linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 35%, #a5d6a7 65%, #81c784 100%)',
-        }} />
-        <svg className="absolute inset-0 w-full h-full opacity-10" viewBox="0 0 1440 900"
-          preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-          <ellipse cx="200" cy="150" rx="320" ry="280" fill={isDark ? '#4ade80' : '#166534'} />
-          <ellipse cx="1300" cy="750" rx="380" ry="300" fill={isDark ? '#16a34a' : '#14532d'} />
-          <ellipse cx="1100" cy="200" rx="200" ry="180" fill={isDark ? '#86efac' : '#15803d'} />
-          <ellipse cx="300" cy="750" rx="260" ry="200" fill={isDark ? '#22c55e' : '#166534'} />
-          <path d="M0 600 Q360 480 720 560 Q1080 640 1440 500 L1440 900 L0 900 Z"
-            fill={isDark ? '#15803d' : '#bbf7d0'} opacity="0.3" />
-          <path d="M0 700 Q400 580 800 650 Q1100 700 1440 600 L1440 900 L0 900 Z"
-            fill={isDark ? '#166534' : '#86efac'} opacity="0.2" />
-        </svg>
-        <div className={clsx('relative z-10', isDark ? 'text-slate-100' : 'text-slate-900')}>{children}</div>
-      </div>
-    );
-  }
+// Fundo para o app principal (painel, quadros, etc.)
+function ShellBackground({ children, isDark }: { children: ReactNode; isDark: boolean }) {
   return (
     <div className={clsx('min-h-screen transition-colors', isDark ? 'bg-slate-950 text-slate-100' : 'bg-slate-100 text-slate-950')}>
       {children}
+    </div>
+  );
+}
+
+// Fundo geometrico para telas de autenticacao
+function AuthShell({ children, isDark }: { children: ReactNode; isDark: boolean }) {
+  return (
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Gradiente adaptativo dark/light */}
+      <div className="absolute inset-0" style={{
+        background: isDark
+          ? 'linear-gradient(135deg, #051a05 0%, #0a2e0a 40%, #062010 70%, #030f03 100%)'
+          : 'linear-gradient(135deg, #e8f5e9 0%, #d0ead1 40%, #bbdfbd 70%, #a8d5ab 100%)',
+      }} />
+      {/* Padrão geométrico */}
+      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1440 900"
+        preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="200,50 400,350 0,350" fill="none"
+          stroke={isDark ? '#22c55e' : '#4ade80'} strokeWidth="1" opacity={isDark ? '0.15' : '0.4'} />
+        <polygon points="900,100 1150,450 650,450" fill="none"
+          stroke={isDark ? '#22c55e' : '#4ade80'} strokeWidth="1" opacity={isDark ? '0.12' : '0.3'} />
+        <polygon points="1300,200 1500,500 1100,500" fill="none"
+          stroke={isDark ? '#16a34a' : '#22c55e'} strokeWidth="1" opacity={isDark ? '0.15' : '0.35'} />
+        <polygon points="100,550 350,850 -150,850" fill="none"
+          stroke={isDark ? '#22c55e' : '#4ade80'} strokeWidth="1" opacity={isDark ? '0.1' : '0.25'} />
+        <polygon points="1100,500 1350,800 850,800" fill="none"
+          stroke={isDark ? '#16a34a' : '#22c55e'} strokeWidth="1" opacity={isDark ? '0.12' : '0.3'} />
+        <polygon points="700,80 780,200 620,200"
+          fill={isDark ? '#16a34a' : '#86efac'} opacity={isDark ? '0.25' : '0.5'} />
+        <polygon points="1200,300 1260,400 1140,400"
+          fill={isDark ? '#15803d' : '#4ade80'} opacity={isDark ? '0.2' : '0.4'} />
+        <polygon points="300,650 360,750 240,750"
+          fill={isDark ? '#16a34a' : '#86efac'} opacity={isDark ? '0.2' : '0.45'} />
+        <line x1="0" y1="200" x2="500" y2="700"
+          stroke={isDark ? '#22c55e' : '#16a34a'} strokeWidth="0.8" opacity={isDark ? '0.1' : '0.2'} />
+        <line x1="200" y1="0" x2="900" y2="900"
+          stroke={isDark ? '#16a34a' : '#15803d'} strokeWidth="0.8" opacity={isDark ? '0.08' : '0.15'} />
+        <line x1="800" y1="0" x2="1440" y2="600"
+          stroke={isDark ? '#22c55e' : '#16a34a'} strokeWidth="0.8" opacity={isDark ? '0.1' : '0.2'} />
+        <line x1="1000" y1="0" x2="400" y2="900"
+          stroke={isDark ? '#15803d' : '#22c55e'} strokeWidth="0.8" opacity={isDark ? '0.08' : '0.15'} />
+        <circle cx="450" cy="150" r="3" fill={isDark ? '#22c55e' : '#16a34a'} opacity={isDark ? '0.3' : '0.5'} />
+        <circle cx="900" cy="400" r="2" fill={isDark ? '#22c55e' : '#16a34a'} opacity={isDark ? '0.25' : '0.4'} />
+        <circle cx="1300" cy="650" r="3" fill={isDark ? '#16a34a' : '#22c55e'} opacity={isDark ? '0.3' : '0.5'} />
+        <circle cx="150" cy="750" r="2" fill={isDark ? '#22c55e' : '#16a34a'} opacity={isDark ? '0.25' : '0.4'} />
+        <circle cx="700" cy="600" r="2" fill={isDark ? '#15803d' : '#22c55e'} opacity={isDark ? '0.2' : '0.35'} />
+        <path d="M400 300 L500 300 L500 400 L650 400" fill="none"
+          stroke={isDark ? '#22c55e' : '#16a34a'} strokeWidth="1" opacity={isDark ? '0.12' : '0.25'} />
+        <circle cx="400" cy="300" r="3" fill={isDark ? '#22c55e' : '#16a34a'} opacity={isDark ? '0.2' : '0.35'} />
+        <circle cx="650" cy="400" r="3" fill={isDark ? '#22c55e' : '#16a34a'} opacity={isDark ? '0.2' : '0.35'} />
+        <path d="M1000 200 L1100 200 L1100 300 L1200 300" fill="none"
+          stroke={isDark ? '#16a34a' : '#22c55e'} strokeWidth="1" opacity={isDark ? '0.12' : '0.25'} />
+        <circle cx="1000" cy="200" r="3" fill={isDark ? '#16a34a' : '#22c55e'} opacity={isDark ? '0.2' : '0.35'} />
+        <circle cx="1200" cy="300" r="3" fill={isDark ? '#16a34a' : '#22c55e'} opacity={isDark ? '0.2' : '0.35'} />
+      </svg>
+      <div className={clsx('relative z-10', isDark ? 'text-slate-100' : 'text-slate-800')}>
+        {children}
+      </div>
     </div>
   );
 }
@@ -914,6 +934,7 @@ function AuthScreen({ authMode, authError, authSuccess, isDark, setAuthMode, set
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const clock = useLocalClock();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -927,65 +948,121 @@ function AuthScreen({ authMode, authError, authSuccess, isDark, setAuthMode, set
     }
   }
 
+  // Estilos adaptativos
+  const cardBg = isDark
+    ? 'bg-white/5 border-white/10 backdrop-blur-md'
+    : 'bg-white/90 border-green-200/60 backdrop-blur-sm shadow-xl';
+  const inputCls = isDark
+    ? 'border-white/10 bg-white/5 text-slate-100 focus:border-green-400'
+    : 'border-green-200 bg-white text-slate-800 focus:border-green-500';
+  const labelCls = isDark ? 'text-slate-300' : 'text-slate-600';
+  const btnSecondary = isDark
+    ? 'border-white/10 text-slate-300 hover:bg-white/10'
+    : 'border-green-200 text-slate-600 hover:bg-green-50';
+  const clockColor = isDark ? 'text-green-400' : 'text-green-600';
+  const clockDateColor = isDark ? 'text-slate-400' : 'text-slate-500';
+  const subtitleColor = isDark ? 'text-slate-400' : 'text-slate-500';
+  const titleColor = isDark ? 'text-white' : 'text-slate-800';
+  const iconBg = isDark ? 'bg-green-500/10 text-green-400' : 'bg-green-100 text-green-600';
+  const btnPrimary = isDark
+    ? 'bg-green-600 hover:bg-green-500 shadow-green-900/40 text-white'
+    : 'bg-green-600 hover:bg-green-500 shadow-green-200 text-white';
+  const themeBtnCls = isDark
+    ? 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'
+    : 'border-green-200 bg-white/80 text-slate-600 hover:bg-green-50';
+  const footerCls = isDark ? 'text-slate-600' : 'text-slate-400';
+  const footerHighlight = isDark ? 'text-green-500/80' : 'text-green-600';
+
   return (
-    <ShellBackground isDark={isDark} isAuth>
+    <AuthShell isDark={isDark}>
       <div className="grid min-h-screen place-items-center px-5 py-8">
         <div className="w-full max-w-md">
+
+          {/* Relogio */}
+          <div className="mb-5 text-center">
+            <p className={clsx('text-xs capitalize', clockDateColor)}>{clock.date}</p>
+            <p className={clsx('text-3xl font-semibold tracking-widest mt-1', clockColor)}>{clock.time}</p>
+          </div>
+
+          {/* Header logo */}
           <div className="mb-5 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img src="/logo-sangra.png" alt="Sangra D'Água" className="h-11 w-auto object-contain" />
               <div>
-                <p className={clsx('text-xs leading-tight', isDark ? 'text-slate-400' : 'text-slate-500')}>
-                  Grupo Empresarial Sangra D'Água
-                </p>
-                <h1 className="text-xl font-semibold">TasksApp</h1>
+                <p className={clsx('text-xs leading-tight', subtitleColor)}>Grupo Empresarial Sangra D'Água</p>
+                <h1 className={clsx('text-xl font-semibold', titleColor)}>TasksApp</h1>
               </div>
             </div>
-            <IconButton isDark={isDark} title="Alternar tema" onClick={onToggleTheme}>
+            <button onClick={onToggleTheme} title="Alternar tema"
+              className={clsx('grid h-10 w-10 place-items-center rounded-md border transition', themeBtnCls)}>
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-            </IconButton>
+            </button>
           </div>
 
-          <Panel isDark={isDark}>
+          {/* Card de login */}
+          <div className={clsx('rounded-xl border p-6', cardBg)}>
             <div className="mb-5 flex items-center gap-3">
-              <div className="grid h-10 w-10 place-items-center rounded-md bg-cyan-500/10 text-cyan-300">
+              <div className={clsx('grid h-10 w-10 place-items-center rounded-md', iconBg)}>
                 {authMode === 'bootstrap' ? <ShieldCheck size={20} /> : <KeyRound size={20} />}
               </div>
               <div>
-                <h2 className="text-lg font-semibold">{authMode === 'bootstrap' ? 'Criar usuario master' : 'Entrar no sistema'}</h2>
-                <p className={clsx('text-sm', isDark ? 'text-slate-400' : 'text-slate-500')}>
+                <h2 className={clsx('text-lg font-semibold', titleColor)}>
+                  {authMode === 'bootstrap' ? 'Criar usuario master' : 'Entrar no sistema'}
+                </h2>
+                <p className={clsx('text-sm', subtitleColor)}>
                   {authMode === 'bootstrap' ? 'Disponivel apenas antes do primeiro usuario.' : 'Use seu nome de usuario e senha.'}
                 </p>
               </div>
             </div>
 
             <form className="space-y-3" onSubmit={handleSubmit}>
-              {authMode === 'bootstrap' && <TextField label="Nome" value={name} onChange={setName} isDark={isDark} autoComplete="name" />}
-              {authMode === 'login'
-                ? <TextField label="Nome de usuario" value={email} onChange={setEmail} isDark={isDark} type="text" autoComplete="username" />
-                : <TextField label="E-mail" value={email} onChange={setEmail} isDark={isDark} type="email" autoComplete="email" />}
-              <TextField label="Senha" value={password} onChange={setPassword} isDark={isDark} type="password"
-                autoComplete={authMode === 'bootstrap' ? 'new-password' : 'current-password'} />
+              {authMode === 'bootstrap' && (
+                <label className="grid gap-1 text-sm">
+                  <span className={labelCls}>Nome</span>
+                  <input value={name} onChange={(e) => setName(e.target.value)} autoComplete="name"
+                    className={clsx('h-10 rounded-md border px-3 outline-none transition', inputCls)} />
+                </label>
+              )}
+              <label className="grid gap-1 text-sm">
+                <span className={labelCls}>{authMode === 'login' ? 'Nome de usuario' : 'E-mail'}</span>
+                <input value={email} onChange={(e) => setEmail(e.target.value)}
+                  type={authMode === 'login' ? 'text' : 'email'}
+                  autoComplete={authMode === 'login' ? 'username' : 'email'}
+                  className={clsx('h-10 rounded-md border px-3 outline-none transition', inputCls)} />
+              </label>
+              <label className="grid gap-1 text-sm">
+                <span className={labelCls}>Senha</span>
+                <input value={password} onChange={(e) => setPassword(e.target.value)}
+                  type="password" autoComplete={authMode === 'bootstrap' ? 'new-password' : 'current-password'}
+                  className={clsx('h-10 rounded-md border px-3 outline-none transition', inputCls)} />
+              </label>
 
               {authError && <Alert tone="error">{authError}</Alert>}
               {authSuccess && <Alert tone="success">{authSuccess}</Alert>}
 
               <button disabled={submitting}
-                className="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-cyan-500 px-4 text-sm font-semibold text-white shadow-lg shadow-cyan-500/20 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60">
+                className={clsx('flex h-11 w-full items-center justify-center gap-2 rounded-md px-4 text-sm font-semibold shadow-lg transition disabled:cursor-not-allowed disabled:opacity-60', btnPrimary)}>
                 {submitting ? 'Aguarde...' : authMode === 'bootstrap' ? 'Criar master' : 'Entrar'}
               </button>
             </form>
 
             <button
-              className={clsx('mt-4 w-full rounded-md border px-3 py-2 text-sm transition',
-                isDark ? 'border-white/10 text-slate-300 hover:bg-white/10' : 'border-slate-200 text-slate-600 hover:bg-slate-100')}
+              className={clsx('mt-4 w-full rounded-md border px-3 py-2 text-sm transition', btnSecondary)}
               onClick={() => { setAuthError(''); setAuthMode(authMode === 'login' ? 'bootstrap' : 'login'); }}>
               {authMode === 'login' ? 'Criar primeiro master' : 'Voltar para login'}
             </button>
-          </Panel>
+          </div>
+
+          {/* Rodapé */}
+          <p className={clsx('mt-6 text-center text-xs', footerCls)}>
+            © 2026 TasksApp — Todos os direitos reservados
+            <br />
+            Desenvolvido por <span className={footerHighlight}>MIS Soluções Tecnológicas</span>
+          </p>
+
         </div>
       </div>
-    </ShellBackground>
+    </AuthShell>
   );
 }
 
@@ -1019,44 +1096,65 @@ function PasswordChangeScreen({ isDark, user, token, onLogout, onChanged, onTogg
     }
   }
 
+  const cardBg = isDark ? 'bg-white/5 border-white/10 backdrop-blur-md' : 'bg-white/90 border-green-200/60 backdrop-blur-sm shadow-xl';
+  const inputCls = isDark ? 'border-white/10 bg-white/5 text-slate-100 focus:border-green-400' : 'border-green-200 bg-white text-slate-800 focus:border-green-500';
+  const labelCls = isDark ? 'text-slate-300' : 'text-slate-600';
+  const titleColor = isDark ? 'text-white' : 'text-slate-800';
+  const subtitleColor = isDark ? 'text-slate-400' : 'text-slate-500';
+  const iconBg = isDark ? 'bg-green-500/10 text-green-400' : 'bg-green-100 text-green-600';
+  const btnPrimary = isDark ? 'bg-green-600 hover:bg-green-500 text-white' : 'bg-green-600 hover:bg-green-500 text-white';
+  const themeBtnCls = isDark ? 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10' : 'border-green-200 bg-white/80 text-slate-600 hover:bg-green-50';
+
   return (
-    <ShellBackground isDark={isDark} isAuth>
+    <AuthShell isDark={isDark}>
       <div className="grid min-h-screen place-items-center px-5 py-8">
         <div className="w-full max-w-md">
           <div className="mb-5 flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-semibold">TasksApp</h1>
-              <p className={clsx('text-sm', isDark ? 'text-slate-400' : 'text-slate-500')}>{user.name} - {user.role.name}</p>
+              <h1 className={clsx('text-xl font-semibold', titleColor)}>TasksApp</h1>
+              <p className={clsx('text-sm', subtitleColor)}>{user.name} - {user.role.name}</p>
             </div>
             <div className="flex gap-2">
-              <IconButton isDark={isDark} title="Alternar tema" onClick={onToggleTheme}>
+              <button onClick={onToggleTheme} title="Alternar tema"
+                className={clsx('grid h-10 w-10 place-items-center rounded-md border transition', themeBtnCls)}>
                 {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-              </IconButton>
-              <IconButton isDark={isDark} title="Sair" onClick={onLogout}><LogOut size={18} /></IconButton>
+              </button>
+              <button onClick={onLogout} title="Sair"
+                className={clsx('grid h-10 w-10 place-items-center rounded-md border transition', themeBtnCls)}>
+                <LogOut size={18} />
+              </button>
             </div>
           </div>
-          <Panel isDark={isDark}>
+          <div className={clsx('rounded-xl border p-6', cardBg)}>
             <div className="mb-5 flex items-center gap-3">
-              <div className="grid h-10 w-10 place-items-center rounded-md bg-cyan-500/10 text-cyan-300"><KeyRound size={20} /></div>
+              <div className={clsx('grid h-10 w-10 place-items-center rounded-md', iconBg)}><KeyRound size={20} /></div>
               <div>
-                <h2 className="text-lg font-semibold">Alterar senha inicial</h2>
-                <p className={clsx('text-sm', isDark ? 'text-slate-400' : 'text-slate-500')}>A senha padrao deve ser substituida antes do uso.</p>
+                <h2 className={clsx('text-lg font-semibold', titleColor)}>Alterar senha inicial</h2>
+                <p className={clsx('text-sm', subtitleColor)}>A senha padrao deve ser substituida antes do uso.</p>
               </div>
             </div>
             <form className="space-y-3" onSubmit={handleSubmit}>
-              <TextField label="Senha atual" value={currentPassword} onChange={setCurrentPassword} isDark={isDark} type="password" />
-              <TextField label="Nova senha" value={newPassword} onChange={setNewPassword} isDark={isDark} type="password" />
-              <TextField label="Confirmar nova senha" value={confirmPassword} onChange={setConfirmPassword} isDark={isDark} type="password" />
+              {[
+                { label: 'Senha atual', value: currentPassword, onChange: setCurrentPassword },
+                { label: 'Nova senha', value: newPassword, onChange: setNewPassword },
+                { label: 'Confirmar nova senha', value: confirmPassword, onChange: setConfirmPassword },
+              ].map(({ label, value, onChange }) => (
+                <label key={label} className="grid gap-1 text-sm">
+                  <span className={labelCls}>{label}</span>
+                  <input value={value} onChange={(e) => onChange(e.target.value)} type="password"
+                    className={clsx('h-10 rounded-md border px-3 outline-none transition', inputCls)} />
+                </label>
+              ))}
               {error && <Alert tone="error">{error}</Alert>}
               <button disabled={submitting}
-                className="flex h-11 w-full items-center justify-center gap-2 rounded-md bg-cyan-500 px-4 text-sm font-semibold text-white shadow-lg shadow-cyan-500/20 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60">
+                className={clsx('flex h-11 w-full items-center justify-center gap-2 rounded-md px-4 text-sm font-semibold shadow-lg transition disabled:opacity-60', btnPrimary)}>
                 {submitting ? 'Salvando...' : 'Salvar nova senha'}
               </button>
             </form>
-          </Panel>
+          </div>
         </div>
       </div>
-    </ShellBackground>
+    </AuthShell>
   );
 }
 
