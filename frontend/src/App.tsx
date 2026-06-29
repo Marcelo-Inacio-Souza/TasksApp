@@ -526,8 +526,12 @@ function QuadrosView({ isDark, token }: { isDark: boolean; token: string }) {
   }
 
   async function handleTaskCreated() {
-    if (selectedBoard) await loadBoard(selectedBoard.id);
+  if (selectedBoard) {
+    const boardId = selectedBoard.id;
+    setSelectedBoard(null);
+    await loadBoard(boardId);
   }
+}  
 
   async function handleTaskMoved(taskId: string, targetColumnId: string, position: number) {
     try {
